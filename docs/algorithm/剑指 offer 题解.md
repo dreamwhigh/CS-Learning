@@ -1,7 +1,3 @@
----
-typora-root-url: pics
----
-
 #### CS-Notes 剑指offer_3
 
 -------
