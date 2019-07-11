@@ -1,2 +1,6 @@
-# CS-Learning
-personal CS study notes
+## 首页
+
+E-mail: huiting.w@foxmai.com
+
+[Github](<https://github.com/dreamwhigh>)
+
