@@ -1,6 +1,7 @@
 <!-- GFM-TOC -->
 
 - [Java 版本](#Java 版本)
+- [名词解释](#名词解释)
 
 <!-- GFM-TOC -->
 
@@ -407,8 +408,233 @@ class Person {
 
 任何类，除了 `Object`，都会继承自某个类，未明确注明 `extends` 的类，编译器会自动加上 `extends Object`。
 
-实现代码的复用
-
 任何`class`的构造方法，第一行语句必须是调用父类的构造方法。如果没有明确地调用父类的构造方法，编译器会帮我们自动加一句`super();`
 
-子类*不会继承*任何父类的构造方法。子类默认的构造方法是编译器自动生成的，不是继承的
+子类*不会继承*任何父类的构造方法。子类默认的构造方法是编译器自动生成的，不是继承的。
+
+##### 多态
+
+子类可以覆写父类的方法（Override），覆写在子类中改变了父类方法的行为。
+
+Java 的实例方法调用是基于**运行时的实际类型的动态调用**，而非变量的声明类型。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+    //引用类型为 Person，实际类型为 Student
+    	Person p = new Student();
+        p.run(); // 打印Student.run
+    }
+}
+
+class Person {
+    public void run() {
+        System.out.println("Person.run");
+    }
+}
+
+class Student extends Person {
+    @Override
+    public void run() {
+        System.out.println("Student.run");
+    }
+}
+```
+
+**多态的特性：运行期才能动态决定调用的子类方法。**
+
+```java
+//无法确定传入参数 p 的实际类型是 Person 还是 Student 
+public void runTwice(Person p) {
+    //无法确定调用的是哪个类的 run()方法
+    p.run();
+    p.run();
+}
+```
+
+##### 抽象类
+
+如果父类的方法本身不需要实现任何功能，仅仅是为了定义方法签名，目的是让子类去覆写它，那么，可以把父类的方法声明为抽象方法：
+
+```java
+class Person {
+    public abstract void run();
+}
+```
+
+使用 `abstract` 修饰的类就是抽象类。我们无法实例化一个抽象类，抽象类本身被设计成只能用于被继承。
+
+通过 `abstract` 定义的方法是抽象方法，它只有定义，没有实现。抽象方法定义了子类必须实现的接口规范。
+
+通过`abstract`定义的方法是抽象方法，它只有定义，没有实现，不能被实例化。抽象方法定义了子类必须实现的接口规范；
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Student();
+        p.run();
+    }
+}
+
+abstract class Person {
+    public abstract void run();
+}
+
+class Student extends Person {
+    @Override
+    public void run() {
+        System.out.println("Student.run");
+    }
+}
+```
+
+###### 面向抽象编程
+
+是一种引用高层类型，避免引用实际子类型的方式。
+
+- 上层代码只定义规范（例如：`abstract class Person`）；
+- 具体的业务逻辑由不同的子类实现，调用者并不关心。
+- 只关心抽象方法的定义，不关心子类的具体实现。
+
+```java
+Person s = new Student();
+// 不关心Person变量的具体子类型:
+s.run();
+```
+
+##### 接口
+
+接口中不能有字段，定义的方法默认都是 `public abstract` 。
+
+一个类只能继承另一个类，但可以实现多个接口，使用关键字 `implements` ；
+
+一个接口可以继承另一个接口，使用关键字 `extends` 。
+
+```java
+interface Hello {
+    void hello();
+}
+//一个接口继承另一个接口, extends
+interface Person extends Hello {
+    void run();
+}
+//一个类实现多个接口,implements
+class Student implements Person, Hello {
+    private String name;
+
+    public Student(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void hello() {
+        System.out.println(this.name + " hello");
+    }
+    
+    @Override
+    public void run() {
+        System.out.println(this.name + " run");
+    }
+    
+}
+```
+
+术语区分：Java 的接口特指 `interface` 的定义，表示一个接口类型和一组方法签名，而编程接口泛指接口规范，如方法签名，数据格式，网络协议等。
+
+**[default方法](<https://blog.csdn.net/qq_35835624/article/details/80196932>)**
+
+从 JDK 1.8 之后，接口可以定义 `default` 方法，实现类可以不必覆写`default` 方法；当同时继承的两个接口中都定义了相同 `default` 方法，不知道调用哪个接口中的 `default` 方法，需要在实现类中重新实现该方法；当继承的父类和一个接口中定义了同一个方法，这时候实现类调用父类的方法，因为**类优先于接口**。
+
+`default`方法和抽象类的普通方法是有所不同的。因为`interface`没有字段，`default`方法无法访问字段，而抽象类的普通方法可以访问实例字段。
+
+##### 静态字段和静态方法
+
+###### 静态字段
+
+```java
+class Person {
+    //定义实例字段 name:
+    public String name;
+    // 定义静态字段 number:
+    public static int number;
+}
+```
+
+- 实例字段：在 class 中定义的字段，每个实例都有独立的字段，各个实例的同名字段互不影响。
+- 静态字段：用 `static` 修饰的字段，所有实例共享同一个静态字段。修改一个实例的静态字段，会改变所有实例的静态字段，因为本质上都是同一个字段。
+- 不推荐用 `实例变量.静态字段` (hong.number) 去访问静态字段，因为在Java程序中，实例对象并没有静态字段；推荐用 `类名.静态字段` (Person.number) 来访问。把静态字段理解为描述 `class` 本身的字段（非实例字段）。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Person ming = new Person("Xiao Ming", 12);
+        Person hong = new Person("Xiao Hong", 15);
+        ming.number = 88;
+        System.out.println(hong.number);//88
+        hong.number = 99;
+        System.out.println(ming.number);//99
+    }
+}
+
+class Person {
+    public String name;
+    public int age;
+
+    public static int number;//静态变量
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+}
+```
+
+###### 静态方法
+
+用 `static` 修饰的方法
+
+调用实例方法必须通过一个实例变量，而调用静态方法直接通过类名就可以调用。
+
+因为静态方法属于`class`而不属于实例，因此，静态方法内部，无法访问`this`  变量，也无法访问实例字段，它只能访问静态字段。
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        //直接通过 类名.方法名 调用静态方法
+        Person.setNumber(99);
+        System.out.println(Person.number);
+    }
+}
+
+class Person {
+    public static int number;
+    //静态方法
+    public static void setNumber(int value) {
+        number = value;
+    }
+}
+```
+
+###### 接口的静态字段
+
+接口不能定义实例字段，但可以有静态字段，默认为 `public static final` 类型。
+
+##### 包
+
+Java内建的`package`机制是为了避免`class`命名冲突；
+
+JDK的核心类使用`java.lang`包，编译器会自动导入；
+
+JDK的其它常用类定义在`java.util.*`，`java.math.*`，`java.text.*`，……；
+
+包名推荐使用倒置的域名，例如`org.apache`。
+
+##### 作用域
+
+一个`.java`文件只能包含一个`public`类，但可以包含多个非`public`类。如果有`public`类，文件名必须和`public`类的名字相同。
+
+#### Java 核心类
+
+###### 拼接字符串
+
+StringJoiner (CharSequence delimiter, CharSequence prefix,  CharSequence suffix) 的第二个和第三个参数分别是拼接后的字符串的前缀和后缀。
