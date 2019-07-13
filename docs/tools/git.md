@@ -2,6 +2,8 @@
 
 -------
 
+本人所用学习教程见：[廖雪峰的官方网站—Git 教程](<https://www.liaoxuefeng.com/wiki/896043488029600>)
+
 ##### git 安装教程
 
 [git 国内镜像下载地址](<https://github.com/waylau/git-for-win/>)
@@ -798,11 +800,4 @@ fatal: remote origin already exists. 报错远程起源已经存在
 $ git remote rm origin
 $ git remote add origin git@github.com:dreamwhigh/test.git
 ```
-
- 用git push -u origin -u origin master提交时报错：
-
-error: src refspec origin does not match any
-error: failed to push some refs to 'remote'
-
-原因是没有创建主分支 master ，远程没有匹配上 "master"，解决方法如下：
 

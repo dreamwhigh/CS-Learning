@@ -16,6 +16,10 @@
 npm i docsify-cli -g
 ```
 
+##### 安装 notepad++
+
+文本编辑器推荐安装 [notepad++](<https://notepad-plus-plus.org/>) 。
+
 #### 初始化
 
 在 E:\GitHub 下打开 git bash here ,通过 `docsify init ./name` 初始化项目，自动生成 E:\GitHub\docsify 目录，且在该目录下会存在以下三个文件：
@@ -53,10 +57,11 @@ Listening at http://localhost:3000
 对应的访问地址为
 
 ```
-
+docs/README.md        => http://domain.com
+docs/guide.md         => http://domain.com/guide
+docs/zh-cn/README.md  => http://domain.com/zh-cn/
+docs/zh-cn/guide.md   => http://domain.com/zh-cn/guide
 ```
-
-
 
 #### 侧边栏
 
@@ -74,7 +79,7 @@ Listening at http://localhost:3000
   </script>
 ```
 
-​	接着创建 `_sidebar.md` 文件，保存在根目录 E:\GitHub\docsify 下
+接着创建 `_sidebar.md` 文件，保存在根目录 E:\GitHub\docsify 下
 
 ```
 * [首页](guide)
@@ -82,9 +87,9 @@ Listening at http://localhost:3000
 * [自定义加载的文件](summary)
 ```
 
- 	效果
+ 效果
 
-![1562813004256](E:\GitHub\docsify-pics\1562813004256.png)
+![1562813004256](E:\GitHub\CS-Learning\docs\tools\pics\1562813004256.png)
 
 ##### 自定义加载文件名
 
@@ -100,7 +105,7 @@ Listening at http://localhost:3000
 
 效果
 
-![562813148977](E:\GitHub\docsify-pics\1562813148977.png)
+![562813148977](E:\GitHub\CS-Learning\docs\tools\pics\1562813148977.png)
 
 #### 目录
 
@@ -158,9 +163,11 @@ Listening at http://localhost:3000
 
 显示结果如下：
 
-![1562814881526](E:\GitHub\docsify-pics\1562814881526.png)
+![1562814881526](E:\GitHub\CS-Learning\docs\tools\pics\1562814881526.png)
 
 #### 导航栏
+
+两种方法：HTML 定义和 Markdown 文件定义
 
 ##### HTML 定义
 
@@ -190,14 +197,14 @@ Listening at http://localhost:3000
 <script src="//unpkg.com/docsify"></script>
 ```
 
-​	创建 `_navbar.md` ，保存在根目录 E:\GitHub\docsify 下
+创建 `_navbar.md` ，保存在根目录 E:\GitHub\docsify 下
 
 ```markdown
 * [En](/)
 * [中文](/zh-cn/)
 ```
 
-​	与侧边栏一样，也可以自定义加载文件名
+与侧边栏一样，也可以自定义加载文件名
 
 ```
 window.$docsify = {
@@ -211,7 +218,7 @@ window.$docsify = {
 
 **Markdown 文件配置的优先级高于直接在 HTML 里定义**
 
-##### 嵌套
+##### 嵌套（下拉列表）
 
 如果导航内容过多，可以写成嵌套的列表，会被渲染成下拉列表的形式。
 
@@ -229,7 +236,7 @@ window.$docsify = {
 
 结果如下图：
 
-![1562817235032](E:\GitHub\docsify-pics\1562817235032.png)
+![1562817235032](E:\GitHub\CS-Learning\docs\tools\pics\1562817235032.png)
 
 #### 封面
 
@@ -283,10 +290,6 @@ or
 ![color](#f0f0f0)
 ```
 
-常用颜色????
-
-
-
 ##### 多个封面页
 
 ```
@@ -307,8 +310,59 @@ window.$docsify = {
 };
 ```
 
-#### [其他配置项](<https://docsify.js.org/#/zh-cn/configuration>)
+#### 更多
 
-主题
+更多详细说明参照：
 
-<link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
+[官方说明文档-英文版](<https://docsify.js.org/#/>)
+
+[官方说明文档-中文版](<https://docsify.js.org/#/zh-cn/>)
+
+#### 示例
+
+[完整项目可在 GitHub 上 fork](<https://github.com/dreamwhigh/CS-Learning>)
+
+个人 index.html 的配置如下：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CS-Learning</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+		maxAge: 100,
+		name: 'CS-Learning',//文档名
+		repo: 'dreamwhigh/CS-Learning',//Github corner 挂件
+		loadSidebar: true,//配置侧边栏
+		subMaxLevel: 2,//配置目录副标题级数
+		maxLevel: 3,
+		loadNavbar: true,//配置导航栏
+		coverpage: true,//配置封面
+        search: {
+            paths: 'auto',
+            placeholder: '🔍 Type to search ',
+            noData: '😞 No Results! ',
+            // Headline depth, 1 - 6
+            depth: 6
+        },//增加搜索框
+    }
+  </script>
+  <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
+  <script src="//unpkg.com/docsify/lib/plugins/search.min.js"></script>
+  <script src="//unpkg.com/prismjs/components/prism-java.min.js"></script>
+  <script src="//unpkg.com/docsify/lib/plugins/zoom-image.js"></script>
+  <script src="//unpkg.com/docsify-copy-code"></script>
+  <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
+</body>
+</html>
+
+```

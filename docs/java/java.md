@@ -1,6 +1,8 @@
----
-typora-copy-images-to: pics
----
+<!-- GFM-TOC -->
+
+- [Java 版本](#Java 版本)
+
+<!-- GFM-TOC -->
 
 # Java 简介
 
@@ -134,6 +136,10 @@ String[] names = {
 ```
 
 ![1562912100211](E:\GitHub\CS-Learning\docs\java\pics\1562912100211.png)
+
+<div align="center"> <img src="https://dreamwhigh.github.io/CS-Learning/#/java/pics/1562912100211.png" width="600"/> </div><br>
+
+<div align="center"> <img src="https://gitee.com/CyC2018/CS-Notes/raw/master/docs/pics/474e5579-38b1-47d2-8f76-a13ae086b039.jpg"/> </div><br>
 
 #### **关键字**
 
