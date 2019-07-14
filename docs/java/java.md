@@ -87,23 +87,79 @@ IDE是集成开发环境 (Integrated Development Environment) 的缩写，可以
 
 ### Java 程序基础
 
+基本类型的变量是“持有”某个数值，只表示简单的字符或数字，JVM 会为其分配数据类型实际占用的内存空间。
+
+引用类型的变量是“指向”某个对象，可以表示复杂的数据类型，是指向堆区某个实例的指针。
+
+Java的字符类型 `char` 是基本类型，字符串类型 `String` 是引用类型。
+
 #### 基本类型
 
+| 基本类型 | 位数 / bit | 默认值    | 缓存值           | 包装类型  |
+| -------- | ---------- | --------- | ---------------- | --------- |
+| boolean  | 1          | false     | true, false      | Boolean   |
+| byte     | 8          | 0         | all byte value   | Byte      |
+| char     | 16         | ‘ u0000 ' | \u0000 to \u007F | Character |
+| short    | 16         | 0         | -128 ~ 127       | Short     |
+| int      | 32         | 0         | -128 ~ 127       | Interger  |
+| long     | 64         | 0 L       |                  | Long      |
+| float    | 32         | 0.0 f     |                  | Float     |
+| double   | 64         | 0.0       |                  | Double    |
 
+##### 缓存池
+
+参考[IntegerCache](https://blog.csdn.net/weixin_40243894/article/details/81279762)
+
+Integer内部维护着IntegerCache的一个内部类，IntegerCache有一个静态的Integer数组，数组大小默认为**[-128,127]**。在类加载时就将-128 到 127 的Integer对象创建了，并保存在cache数组中。
+
+- `new Integer(1)` 每次都会新建一个对象
+- `Integer.valueOf(1)` 会先判断值是否在缓存池中，若在则直接返回缓存值
+- `Integer x = 1` 会自动装箱，而编译器会在自动装箱过程中调用 valueOf() 方法
+
+```java
+//IntegerCache大小默认为[-128,127]
+Integer x = 1;//自动装箱
+Integer y = 1;
+System.out.println(String.format("1:%s",x == y));// ture，调用缓存池对象
+x = 127;
+y = 127;
+System.out.println(String.format("2:%s",x == y));// ture，调用缓存池对象
+x = 128;
+y = 128;
+System.out.println(String.format("3:%s",x == y));// false，超出127，新建两个不同的Integer对象
+//这里会出现警告，构造函数 Integer(int) 在 java9 之后就不推荐使用了
+Integer x1 = new Integer(1);
+Integer y1 = new Integer(1);
+System.out.println(String.format("4:%s",x1 == y1));// false，new Intege方法新建的两个对象
+x1 = Integer.parseInt("127");
+y1 = Integer.parseInt("127");
+System.out.println(String.format("5:%s",x1 == y1));// ture, parstInt()方法返回的是int基本类型,自动装箱，就变成了Integer x = 127,调用了valueOf方法
+x1 = Integer.parseInt("128");
+y1 = Integer.parseInt("128");
+System.out.println(String.format("6:%s",x1 == y1));// false，超出127    
+Integer x2 = Integer.valueOf(1);
+Integer y2 = Integer.valueOf(1);
+System.out.println(String.format("7:%s",x2 == y2));	//true，调用缓存池中的同一对象
+```
 
 #### 引用类型
 
-###### 字符和字符串
+##### String
 
-Java的字符类型 `char` 是基本类型，字符串类型 `String` 是引用类型；
+###### null 和空字符串
 
-基本类型的变量是“持有”某个数值，引用类型的变量是“指向”某个对象；
+`String a = null` ：声明一个字符串类型的引用，但指向为null，即还没有指向任何的内存空间。 
+`String s = ""` ：声明一个字符串类型的引用，其值为 “” 空字符串，这个 s 引用指向的是空字符串的内存空间。
 
-引用类型的变量可以是空值 `null`；
+###### [判断字符串是否为空：](https://blog.csdn.net/wilson_m/article/details/79120347 )
 
-空字符串是一个有效的字符串对象，它不等于 `null` 。
+`if (s == null || s.length() == 0);  `
+
+如果 String 类型为 null , 而去进行 length() 等操作会抛出 java.lang.NullPointerException，故首先要判断 s == null ，且顺序必须出现在前面。
 
 ###### 字符串不可变
+
+String 类被声明为 final，不可继承。Java 9 之后，改用 byte 类型的 value 数组存储字符串，value 数组被声明为 final，且没有改变 value 数组的方法，保证了 String 不可变。
 
 ```java
 public class Main {
@@ -116,7 +172,55 @@ public class Main {
 }
 ```
 
+[不可变的好处](<https://cyc2018.github.io/CS-Notes/#/notes/Java%20%E5%9F%BA%E7%A1%80?id=%e4%b8%8d%e5%8f%af%e5%8f%98%e7%9a%84%e5%a5%bd%e5%a4%84>)
 
+- 可以缓存 hash 值
+- String Pool 的需要
+- 安全性
+- 线程安全
+
+###### String，StringBuilder，StringBuffer
+
+- String，不可变，线程安全
+- StringBuilder，可变，不是线程安全的
+- StringBuffer，可变，线程安全，内部使用synchronized进行同步
+
+###### [String Pool](<https://www.jianshu.com/p/f3dbe3d57680>)
+
+**new 方法是在堆上创建对象和数组的**
+
+`new String("aaa")` 
+
+- 系统先在字符串常量池里面寻找是否有一个"abc"的字符串，
+
+- 如果有的话，则在堆中复制一个该字符串，并且将堆中的引用指向s,这个时候系统只创建了一个对象，即**堆中的对象**；
+
+- 如果没有的话，则会先在字符串常量池中先创建一个字符串为"abc"的常量，然后再复制到堆里面，最后将堆所在的地址指向s，这个时候创建了两个对象；
+
+`String s = "bbb";` 
+
+- 系统先在字符串中寻找是否存在"abc"的常量
+- 如果存在，则直接将该"abc"在常量池中的地址指向s，这个时候，系统没有创建新对象。
+- 如果不存在，则在常量池中新建一个"abc"并放入常量池里面，然后再返回该地址，这个时候，系统创建了一个对象。
+
+`s.intern()` 
+
+- 如果 String Pool 中已经存在一个字符串和 s 引用的字符串值相等（使用 equals() 方法进行确定），那么就会返回 String Pool 中字符串的引用；
+- 否则在 String Pool 中添加一个新的字符串，并返回这个新字符串的引用。
+
+[示例](<https://cyc2018.github.io/CS-Notes/#/notes/Java%20%E5%9F%BA%E7%A1%80?id=string-pool>)
+
+```java
+String s1 = new String("aaa");
+String s2 = new String("aaa");
+System.out.println(s1 == s2);  // false
+String s3 = s1.intern();
+String s4 = s1.intern();
+System.out.println(s3 == s4);  // true
+String s5 = "bbb";
+String s6 = "bbb";
+System.out.println(s5 == s6);  // true
+```
 
 ##### 数组
 
@@ -138,10 +242,6 @@ String[] names = {
 
 ![1562912100211](E:\GitHub\CS-Learning\docs\java\pics\1562912100211.png)
 
-<div align="center"> <img src="https://dreamwhigh.github.io/CS-Learning/#/java/pics/1562912100211.png" width="600"/> </div><br>
-
-<div align="center"> <img src="https://gitee.com/CyC2018/CS-Notes/raw/master/docs/pics/474e5579-38b1-47d2-8f76-a13ae086b039.jpg"/> </div><br>
-
 #### **关键字**
 
 - var 用于省略变量类型
@@ -151,11 +251,6 @@ String[] names = {
   //编译器会自动判断为下面的语句
   StringBuilder sb = new StringBuilder();
   ```
-
-  
-
-#### 作用域
-
 
 
 #### 整数运算
@@ -402,8 +497,6 @@ class Person {
 
 应该注意的是，返回值不同，其它都相同不算是重载。
 
-
-
 ##### 继承
 
 任何类，除了 `Object`，都会继承自某个类，未明确注明 `extends` 的类，编译器会自动加上 `extends Object`。
@@ -633,8 +726,120 @@ JDK的其它常用类定义在`java.util.*`，`java.math.*`，`java.text.*`，�
 
 一个`.java`文件只能包含一个`public`类，但可以包含多个非`public`类。如果有`public`类，文件名必须和`public`类的名字相同。
 
+[Java变量作用域](https://blog.csdn.net/bupa900318/article/details/80555929)
+[Java变量和对象的作用域](https://www.cnblogs.com/AlanLee/p/6627949.html)
+
+###### 类级变量（全局变量、静态变量）
+需要使用static关键字修饰。类级变量在类定义后就已经存在，占用内存空间，可以通过类名来访问，不需要实例化。
+###### 对象实例级变量（成员变量）
+实例化后才会分配内存空间，才能访问。成员变量是定义在方法之外，类之内的。成员变量随着对象的创建而存在，随着对象的消失而消失。
+###### 方法级变量（局部变量）
+局部变量在调用了对应的方法，执行到了创建该变量的语句时存在，局部变量的作用域从它被声明的点开始，一旦出了自己的作用域马上从内存中消失。
+###### 块级变量
+定义在一个块内部的变量，变量的生存周期就是这个块，出了这个块就消失了，比如 if、for 语句的块。块是指由大括号包围的代码。
+###### 其他说明
+- 方法内部除了能访问方法级的变量，还可以访问类级和实例级的变量
+- 块内部能够访问类级、实例级变量，如果块被包含在方法内部，它还可以访问方法级的变量
+- 类级变量和成员变量是有默认的初始值
+- 方法级和块级的变量没有默认的初始值，必须被显示地初始化，否则不能访问
+
 #### Java 核心类
 
-###### 拼接字符串
+##### 拼接字符串
 
-StringJoiner (CharSequence delimiter, CharSequence prefix,  CharSequence suffix) 的第二个和第三个参数分别是拼接后的字符串的前缀和后缀。
+`StringJoiner (CharSequence delimiter, CharSequence prefix,  CharSequence suffix)` 的第二个和第三个参数分别是拼接后的字符串的前缀和后缀。
+
+##### 包装类
+
+包装类是**引用类型**，用 final 声明，具有**不可变性**。
+
+在编译期自动完成自动装箱和自动拆箱；整数和浮点数的包装类型都继承自 `Number`。
+
+##### JavaBean
+
+符合下面两条规范的 class 称为 JavaBean
+
+- 若干`private`实例字段；
+- 通过`public`方法来读写实例字段。
+
+```java
+public class Person {
+    private String name;
+    private int age;
+
+    public String getName() { return this.name; }
+    public void setName(String name) { this.name = name; }
+
+    public int getAge() { return this.age; }
+    public void setAge(int age) { this.age = age; }
+}
+```
+
+##### 枚举类
+
+Java 使用 `enum` 定义枚举类型，它被编译器编译为 `final class Xxx extends Enum { … }`，本质上就是 class
+
+，引用类型，但其实例不能通过 new 创建，只能通过如下方式定义实例：
+
+```java
+enum Weekday {
+    SUN, MON, TUE, WED, THU, FRI, SAT;
+}
+```
+
+引用类型比较，要使用 `equals()` 方法，如果使用 `==` 比较，它比较的是两个引用类型的变量是否是**同一个对象**。但` enum` 类型的每个常量在 JVM 中只有一个唯一实例，所以可以直接用 `==` 比较。
+
+##### BigInteger
+
+`java.math.BigInteger` 用来表示任意大小的整数，`BigInteger `内部用一个 `int[]` 数组来模拟一个非常大的整数，是不变类，继承自 `Number`。
+
+##### BigDecimal
+
+和`BigInteger`类似，`BigDecimal`可以表示一个任意大小且精度完全准确的浮点数。
+
+`scale()` 方法可以返回小数位数。
+
+###### 判断相等
+
+`equals()`方法：要求两个 `BigDecimal` 的值相等，还要求它们的 `scale()` 相等；
+
+`compareTo()`方法：推荐这种方法比较 `BigDecimal` 的值。
+
+#### 异常处理
+
+##### 异常
+
+Java使用异常来表示错误，并通过 `try ... catch` 捕获异常；
+
+Java的异常是 `class` ，并且从 `Throwable` 继承；
+
+`Error` 是无需捕获的严重错误，`Exception `是应该捕获的可处理的错误；
+
+`RuntimeException` 无需强制捕获，非 `RuntimeException`（Checked Exception）需强制捕获，或者用 `throws` 声明。
+
+##### 捕获异常
+
+JVM在捕获到异常后，会按序匹配某个 `catch` 语句并执行，然后不再继续匹配，即多个 `catch` 语句只有一个能被执行。
+
+###### finally 语句
+
+finally 语句，不是必须要写的。用来保证一些代码必须执行，无论是否捕捉到异常，finally 语句都会被执行
+
+```java
+public static void main(String[] args) {
+    try {
+        process1();
+        process2();
+        process3();
+    } catch (UnsupportedEncodingException e) {//如果捕捉到异常，执行对应的 catch 语句
+        System.out.println("Bad encoding");
+    } catch (IOException e) {
+        System.out.println("IO error");
+    } finally {//无论是否捕捉到异常，finally 语句都会被执行
+        System.out.println("END");
+    }
+}
+```
+
+##### 抛出异常
+
