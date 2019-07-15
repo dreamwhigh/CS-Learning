@@ -295,7 +295,7 @@ List<String> list = new CopyOnWriteArrayList<>();
 
 ### CopyOnWriteArrayList
 
-
+fix bug
 
 ## 参考资料
 
