@@ -282,6 +282,294 @@ String[] names = {
 
 ![1562912100211](E:\GitHub\CS-Learning\docs\java\pics\1562912100211.png)
 
+### 泛型
+
+来自[Java 泛型知识点总结](<https://segmentfault.com/a/1190000014824002>)
+
+泛型的本质是参数化类型，也就是说所操作的数据类型被指定为一个参数。泛型主要使用在集合中。
+
+- 适用于多种数据类型执行相同的代码
+- 泛型中的类型在使用时指定
+- 泛型归根到底就是“模版”
+
+优点：使用泛型时，在实际使用之前类型就已经确定了，不需要强制类型转换。
+
+#### 泛型字母
+
+形式类型参数（formal type parameters）即泛型字母。
+
+命名泛型字母可以随意指定，尽量使用单个的大写字母（有时候多个泛型类型时会加上数字，比如T1，T2）
+常见字母（见名知意）
+
+- T：Type
+- K V：Key Value
+- E：Element
+
+当类被使用时，会使用具体的实际类型参数（actual type argument）代替
+
+#### 泛型类
+
+只能用在成员变量（对象实例级变量）上，只能使用**引用类型**
+
+```java
+/**
+ * 自定义泛型类
+ *
+ * 定义"模版"的时候，泛型用泛型字母：T 代替
+ * 在使用的时候指定实际类型
+ *
+ */
+public class Student<T> {
+  
+  private T javase;
+  
+  //private static T javaee;   // 泛型不能使用在静态属性上
+ 
+  public Student() {
+  }
+ 
+  public Student(T javase) {
+    this();
+    this.javase = javase;
+  }
+ 
+  public T getJavase() {
+    return javase;
+  }
+ 
+  public void setJavase(T javase) {
+    this.javase = javase;
+  }
+  
+}
+/**
+ * 自定义泛型的使用
+ * 在声明时指定具体的类型
+ * 不能为基本类型
+ */
+class Demo02 {
+  public static void main(String[] args) {
+    //Student<int>  Student = new Student<int>(); //不能为基本类型，编译时异常  
+    Student<Integer> student = new Student<Integer>();//在声明时指定具体的类型
+    student.setJavase(85);
+    System.out.println(student.getJavase());  
+  }
+}
+```
+
+#### 泛型接口
+
+ 接口中泛型字母只能使用在抽象方法中
+
+```java
+/**
+ * 自定义泛型接口
+ * 接口中泛型字母只能使用在方法中，不能使用在全局常量中
+ */
+public interface Comparator<T1,T2> {
+  
+  //public static final T1 MAX_VALUE = 100; //接口中泛型字母不能使用在全局常量中
+  //T1 MAX_VALUE;
+  public static final int MAX_VALUE = 100;
+  
+  void compare(T2 t);
+  T2 compare();
+  public abstract T1 compare2(T2 t);
+}
+```
+
+#### 泛型方法
+
+```java
+import java.io.Closeable;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.List; 
+/**
+ * 非泛型类中定义泛型方法
+ * @author Administrator
+ *
+ */
+public class Method {
+ 
+  // 泛型方法，在返回类型前面使用泛型字母
+  public static <T> void test1(T t){
+    System.out.println(t);
+  }
+  
+  // T 只能是list 或者list 的子类
+  public static <T extends List> void test2(T t){
+    t.add("aa");
+  }
+  
+  // T... 可变参数   --->   T[]
+  public static <T extends Closeable> void test3(T...a) {
+    for (T temp : a) {
+     try {
+       if (null != temp) {
+         temp.close();
+       }
+     } catch (Exception e) {
+       e.printStackTrace();
+     }
+     
+    }
+  }
+  
+  public static void main(String[] args) throws FileNotFoundException {
+    test1("java 是门好语言");
+    test3(new FileInputStream("a.txt"));
+  }
+}
+```
+
+#### 泛型的继承
+
+```java
+/**
+ * 泛型继承
+ *
+ * 保留父类泛型 ----》泛型子类 
+ * 不保留父类泛型 -----》子类按需实现
+ *
+ * 子类重写父类的方法，泛型类型随父类而定 子类使用父类的属性，该属性类型随父类定义的泛型
+ *
+ * @author Administrator
+ *
+ * @param <T1>
+ * @param <T2>
+ */
+public abstract class Father<T1, T2> {
+  T1 age;
+ 
+  public abstract void test(T2 name);
+}
+ 
+// 保留父类泛型 ----》泛型子类
+// 1）全部保留
+class C1<T1, T2> extends Father<T1, T2> {
+ 
+  @Override
+  public void test(T2 name) {
+ 
+  }
+}
+ 
+// 2) 部分保留
+class C2<T1> extends Father<T1, Integer> {
+ 
+  @Override
+  public void test(Integer name) {
+ 
+  }
+}
+ 
+// 不保留父类泛型 -----》子类按需实现
+// 1)具体类型
+class C3 extends Father<String, Integer> {
+ 
+  @Override
+  public void test(Integer name) {
+ 
+  }
+}
+ 
+// 2)没有具体类型
+// 泛型擦除：实现或继承父类的子类，没有指定类型，类似于Object
+class C4 extends Father {
+ 
+  @Override
+  public void test(Object name) {
+ 
+  }
+ 
+}
+```
+
+#### 通配符
+
+- T、K、V、E 等泛型字母为有类型，类型参数赋予具体的值
+- ？未知类型 类型参数赋予不确定值，任意类型
+- 只能用在声明类型、方法参数上，不能用在定义泛型类上
+
+#### extends/super
+
+##### 上限（extends）
+
+指定的类必须是继承某个类，或者实现了某个接口（不是implements），即<=
+
+- ? extends List
+
+##### 下限（super）
+
+即父类或本身
+
+- ？ super List
+
+```java
+
+/**
+ * extends:泛型的上限 <= 一般用于限制操作 不能使用在添加数据上，一般都是用于数据的读取
+ *
+ * supper:泛型的上限 >= 即父类或自身。一般用于下限操作
+ *
+ * @author Administrator
+ * @param <T>
+ */
+import java.util.ArrayList;
+import java.util.List; 
+public class Test<T extends Fruit> {
+ 
+  private static void test01() {
+    Test<Fruit> t1 = new Test<Fruit>();
+    Test<Apple> t2 = new Test<Apple>();
+    Test<Pear> t3 = new Test<Pear>();
+  }
+ 
+  private static void test02(List<? extends Fruit> list) {
+ 
+  }
+ 
+  private static void test03(List<? super Apple> list) {
+ 
+  }
+ 
+  public static void main(String[] args) {
+ 
+    // 调用test02(),测试 extends  <=
+    test02(new ArrayList<Fruit>());
+    test02(new ArrayList<Apple>());
+    test02(new ArrayList<ReadApple>());
+    // test02(new ArrayList<Object>()); Object 不是 Fruit 的子类 ，编译不通过
+    
+    
+    // 调用test03() ,测试super >=
+    test03(new ArrayList<Apple>());
+    test03(new ArrayList<Fruit>());
+    //test03(new ArrayList<ReadApple>());  ReadApple < apple,所以不能放入
+  }
+ 
+}
+ 
+class Fruit {
+ 
+}
+ 
+class Apple extends Fruit {
+ 
+}
+ 
+class Pear extends Fruit {
+ 
+}
+ 
+class ReadApple extends Apple {
+ 
+}
+        
+
+```
+
 ### 关键字
 
 - var 用于省略变量类型
