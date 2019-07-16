@@ -784,6 +784,8 @@ static final int tableSizeFor(int cap) {
 
 ### ConcurrentHashMap
 
+#### 存储结构
+
 ```java
 static final class HashEntry<K,V> {
     final int hash;
@@ -793,11 +795,123 @@ static final class HashEntry<K,V> {
 }
 ```
 
+ConcurrentHashMap 和 HashMap 实现上类似，最主要的差别是 ConcurrentHashMap 采用了分段锁（Segment），每个分段锁维护着几个桶（HashEntry），多个线程可以同时访问不同分段锁上的桶，从而使其并发度更高（并发度就是 Segment 的个数）。
 
+默认的并发级别为 16，也就是说默认创建 16 个 Segment。
 
+```java
+static final int DEFAULT_CONCURRENCY_LEVEL = 16;
+```
 
+<div align='center'>
+    <img src=pics/concurrentHashMap.png width="500px">
+</div>
 
+#### size()
 
+每个 Segment 维护了一个 count 变量来统计该 Segment 中的键值对个数。
+
+```java
+transient int count;
+```
+
+在执行 size 操作时，需要遍历所有 Segment 然后把 count 累计起来。
+
+ConcurrentHashMap 在执行 size 操作时先尝试不加锁，如果连续两次不加锁操作得到的结果一致，那么可以认为这个结果是正确的。
+
+尝试次数使用 RETRIES_BEFORE_LOCK 定义，该值为 2，retries 初始值为 -1，因此尝试次数为 3。
+
+如果尝试的次数超过 3 次，就需要对每个 Segment 加锁。
+
+```java
+
+/**
+ * Number of unsynchronized retries in size and containsValue
+ * methods before resorting to locking. This is used to avoid
+ * unbounded retries if tables undergo continuous modification
+ * which would make it impossible to obtain an accurate result.
+ */
+static final int RETRIES_BEFORE_LOCK = 2;
+
+public int size() {
+    // Try a few times to get accurate count. On failure due to
+    // continuous async changes in table, resort to locking.
+    final Segment<K,V>[] segments = this.segments;
+    int size;
+    boolean overflow; // true if size overflows 32 bits
+    long sum;         // sum of modCounts
+    long last = 0L;   // previous sum
+    int retries = -1; // first iteration isn't retry
+    try {
+        for (;;) {
+            // 超过尝试次数，则对每个 Segment 加锁
+            if (retries++ == RETRIES_BEFORE_LOCK) {
+                for (int j = 0; j < segments.length; ++j)
+                    ensureSegment(j).lock(); // force creation
+            }
+            sum = 0L;
+            size = 0;
+            overflow = false;
+            for (int j = 0; j < segments.length; ++j) {
+                Segment<K,V> seg = segmentAt(segments, j);
+                if (seg != null) {
+                    sum += seg.modCount;
+                    int c = seg.count;
+                    if (c < 0 || (size += c) < 0)
+                        overflow = true;
+                }
+            }
+            // 连续两次得到的结果一致，则认为这个结果是正确的
+            if (sum == last)
+                break;
+            last = sum;
+        }
+    } finally {
+        if (retries > RETRIES_BEFORE_LOCK) {
+            for (int j = 0; j < segments.length; ++j)
+                segmentAt(segments, j).unlock();
+        }
+    }
+    return overflow ? Integer.MAX_VALUE : size;
+}
+```
+
+### LinkedHashMap
+
+#### 存储结构
+
+继承自 HashMap，因此具有和 HashMap 一样的快速查找特性。
+
+```java
+public class LinkedHashMap<K,V> extends HashMap<K,V> implements Map<K,V>
+```
+
+内部维护了一个双向链表，用来维护插入顺序或者 LRU 顺序。
+
+```java
+/**
+ * The head (eldest) of the doubly linked list.
+ */
+transient LinkedHashMap.Entry<K,V> head;
+
+/**
+ * The tail (youngest) of the doubly linked list.
+ */
+transient LinkedHashMap.Entry<K,V> tail;
+```
+
+accessOrder 决定了顺序，默认为 false，此时维护的是插入顺序。
+
+```java
+final boolean accessOrder;
+```
+
+LinkedHashMap 最重要的是以下用于维护顺序的函数，它们会在 put、get 等方法中调用。
+
+```java
+void afterNodeAccess(Node<K,V> p) { }
+void afterNodeInsertion(boolean evict) { }
+```
 
 ## 参考资料
 
