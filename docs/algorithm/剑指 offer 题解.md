@@ -1524,3 +1524,46 @@ public class Solution {
 }
 ```
 
+#### CS-Notes 45
+
+------
+
+##### 题目描述
+
+输入一个正整数数组，把数组里所有数字拼接起来排成一个数，打印能拼接出的所有数字中最小的一个。例如输入数组{3，32，321}，则打印出这三个数字能排成的最小数字为321323。
+
+##### 总结
+
+自定义 comparable 接口：
+
+`Arrays.sort(nums, (s1, s2) -> (s1 + s2).compareTo(s2 + s1));`
+
+根据 `(s1 + s2).compareTo(s2 + s1)` 的返回值，确定 s1, s2 的顺序：
+
+- 返回 0 时，表示两者同样的顺序，不分先后；
+- 返回 1 时，表示 s1 > s2，默认是递增排列，故按 s2, s1 顺序排列；
+- 返回 -1 时，表示 s1 < s2，按 s1, s2 顺序排列。
+
+```java
+import java.util.ArrayList;
+import java.util.Arrays;
+public class Solution {
+    public String PrintMinNumber(int [] numbers) {
+        if(numbers == null || numbers.length == 0)
+            return "";
+        String[] nums = new String[numbers.length];
+        for(int i = 0;i < numbers.length;i++){
+            nums[i] = numbers[i] + "";//转化为 String 类型保存
+        }
+        //利用 lambda 表达式自定义 comparable 接口
+        //若 s1 + s2 > s2 + s1,则 s2排在前面
+        Arrays.sort(nums, (s1, s2) -> (s1 + s2).compareTo(s2 + s1));
+        String ret = "";
+        for(String s : nums){
+            ret += s;
+        }
+        return ret;
+    }
+}
+```
+
