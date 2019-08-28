@@ -8,7 +8,7 @@
   - [MySQL](<https://dreamwhigh.github.io/Database-Notes/#/MySQL>)
 
 * **操作系统**
-  - [Linux](<https://dreamwhigh.github.io/OS-Notes/#/Linux%20%E5%85%A5%E9%97%A8>)
+  - [Linux](http://dreamwhigh.github.io/OS-Notes/#/Linux%20入门)
 * **工具**
   - [Docsify](<https://dreamwhigh.github.io/Docsify-Notes/#/docsify>)
   - [Git](<https://dreamwhigh.github.io/Git-Notes/#/Git>)
