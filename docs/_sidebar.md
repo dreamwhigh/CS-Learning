@@ -11,5 +11,5 @@
   - [Linux](http://dreamwhigh.github.io/OS-Notes/#/Linux%20入门)
 * **工具**
   - [Docsify](<https://dreamwhigh.github.io/Docsify-Notes/#/docsify>)
-  - [Git](<https://dreamwhigh.github.io/Git-Notes/#/Git>)
+  - [Git](<https://dreamwhigh.github.io/Git-Notes/#/>)
 
